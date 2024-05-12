@@ -1,0 +1,93 @@
+{% extends 'pos/authenticatedbase.html' %}
+
+{% load static %}
+
+{% block htmltitle %}Stock | Argon{% endblock %}
+
+{% block htmlstatic %}
+    <script src="{% static "pos/libs/vue.js" %}"></script>
+    <link rel="stylesheet" href="{% static "pos/stock.css" %}">
+{% endblock %}
+
+{% block htmlapp %}
+    <section id="allstock">
+
+        <div id="search-container">
+            <input type="text" placeholder="search" id="search" v-model="searchtext">
+        </div>
+
+        <div id="table-holder">
+            <table>
+                <tr>
+                    <th class="cell-id">ID</th>
+                    <th class="cell-name">NAME</th>
+                    <th class="cell-distributor">DISTRIBUTOR</th>
+                    <th class="cell-stock">STOCK</th>
+                </tr>
+                <tr is="product-row" v-for="product in products" v-if="product.visible" v-bind:key="product.id" v-bind:product="product"></tr>
+            </table>
+        </div>
+
+    </section>
+
+    <aside id="newproduct">
+        <h3>New Product</h3>
+        <div>
+            <input type="text" placeholder="search" v-model="newproductquery"  v-on:keyup.enter="queryproduct()" v-on:keydown.esc="closesuggestions()" id="searchnew"/>
+            <ul v-if="newproductsuggestions.length > 0">
+                <suggestionrow v-for="newproduct in newproductsuggestions" :key="newproduct.id" :row-data="newproduct"></suggestionrow>
+            </ul>
+        </div>
+        <div id="selectiondata" v-if="selectedsuggestion != null">
+            <table>
+                <tr>
+                    <td>ID</td>
+                    <td><% selectedsuggestion.id %></td>
+                </tr>
+                <tr>
+                    <td>NAME</td>
+                    <td><% selectedsuggestion.name %></td>
+                </tr>
+                <tr>
+                    <td>GENERIC NAME</td>
+                    <td><% selectedsuggestion.genericname %></td>
+                </tr>
+                <tr>
+                    <td>COMPANY</td>
+                    <td><% selectedsuggestion.company %></td>
+                </tr>
+                <tr>
+                    <td>MRP</td>
+                    <td><% selectedsuggestion.mrp %></td>
+                </tr>
+                <tr>
+                    <td>TAX</td>
+                    <td><% selectedsuggestion.tax %>% </td>
+                </tr>
+            </table>
+        </div>
+        <div id="newproductform" v-if="selectedsuggestion != null">
+            <label for="selectedsuggestionquantity">QUANTITY</label>
+            <input type="number" name="selectedsuggestionquantity" id="selectedsuggestionquantity" v-model="selectedquantity">
+            <label for="distributorselect">DISTRIBUTOR</label>
+            <select name="distributorselect" id="distributorselect" v-model="selecteddistributor"> 
+                <option value="0" selected disabled>NULL</option>
+                <option v-for="distributor in distributors" :value="distributor.id"><% distributor.name %></option>
+            </select>
+            <label for="selectedsuggestioncost">COST</label>
+            <input type="number" name="selectedsuggestioncost" id="selectedsuggestioncost" v-model="selectedcost">
+            <label for="selectedsuggestionprice">PRICE</label>
+            <input type="number" name="selectedsuggestionprice" id="selectedsuggestionprice" v-model="selectedprice">
+            <button @click="addstock">ADD PRODUCT</button>
+        </div>
+    </aside>
+{% endblock %}
+
+{% block htmljs %}
+    <script src="{% static "pos/stock.js" %}"></script>
+    <script>
+        vm.products = {{ productlist|safe }};
+        vm.distributors = {{ distributorlist|safe }};
+        console.log(vm.distributors);
+    </script>
+{% endblock %}
